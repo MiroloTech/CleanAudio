@@ -6,7 +6,7 @@
     "step": 0.1,
     "text": "Audio Amplification",
     "type": "slider",
-    "value": 2.5
+    "value": 1.0
   },
   "samples": {
     "max": 50,
@@ -21,27 +21,6 @@
     "type": "checkbox",
     "value": true,
     "text": "High Res."
-  },
-  "sampleType": {
-    "type": "dropdown",
-    "value": 2,
-    "text": "Sample Type",
-    "items": [
-      "Points",
-      "Average",
-      "Maximum"
-    ]
-  },
-  "horizontal": {
-    "type": "dropdown",
-    "value": 0,
-    "text": "Horizontal mode",
-    "items": [
-      "None",
-      "Arm",
-      "Position",
-      "Position + Arm"
-    ]
   },
   "smoothing": {
     "max": 50.0,
@@ -58,30 +37,29 @@
     "text": "Color Mode",
     "items": [
       "Cover",
-      "Suggestive",
       "Magic",
       "Generated",
-      "Dominant",
       "Custom"
     ]
   },
+  
   "mainColor1": {
     "text": "Main Color",
     "type": "color",
-    "value": "#E29578"
+    "value": "#4B6093"
   },
   "mainColor2": {
     "type": "color",
-    "value": "#FFDDD2"
+    "value": "#213259"
   },
   "bgColor1": {
     "text": "Backgroud Color",
     "type": "color",
-    "value": "#006D77"
+    "value": "#4D8EC8"
   },
   "bgColor2": {
     "type": "color",
-    "value": "#83C5BE"
+    "value": "#C1C3BD"
   },
   
   "ProjType" : {
@@ -90,8 +68,7 @@
     "text": "Projection Type",
     "items": [
       "Normal",
-      "Squared",
-      "freq > id"
+      "Squared"
     ]
   },
   "gradient" : {

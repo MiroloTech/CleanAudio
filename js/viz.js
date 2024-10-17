@@ -41,10 +41,6 @@ let smoothing = 10.0;
 let sampleCount = 10;
 let sampleType = 0;
 
-let horizonatl_arm = false;
-let horizonatl_position = false;
-
-let horizonatl_power = 0.1;
 let finCols = [];
 
 let title = "";
@@ -92,13 +88,6 @@ function livelyPropertyListener(name, val) {
             break;
         case "highres":
             high_res = val;
-            break;
-        case "sampleType":
-            sampleType = val;
-            break;
-        case "horizontal":
-            horizonatl_arm =      (val == 1 || val == 3);
-            horizonatl_position = (val == 2 || val == 3);
             break;
         case "smoothing":
             smoothing = val;
@@ -179,22 +168,16 @@ function livelyAudioListener(audioArray) {
                 case 0: // cover
                     finCols = doColorStuff(col);
                     break;
-                case 1: // suggestive
-                    finCols = colorStuffSuggestive(col);
-                    break;
-                case 2: // suggestive
+                case 1: // magic
                     finCols = colorMagic(col);
                     break;
-                case 3: // magic
+                case 2: // random
                     finCols = generatedColors();
                     break;
-                case 4: // dominant
-                    finCols = colorDominant(col, colorThief.getColor(cover));
-                    break;
-                case 5: // custom
+                case 3: // custom
                     finCols = setColorsToPicked()
                     break;
-                default:
+                default: // random
                     finCols = generatedColors();
                     break;
             }
@@ -202,9 +185,6 @@ function livelyAudioListener(audioArray) {
             finCols = setColorsToPicked()
         }
     }
-    
-    console.log("[" + finCols + "]")
-    console.log("{" + last_cover_data + "}")
     
     linesColor = finCols[0];
     backgroundColor = finCols[1];
@@ -229,99 +209,27 @@ function livelyAudioListener(audioArray) {
     let arr = [0.0];
     let arrx = [0.0];
     let interval = Math.floor(activeArr.length / sampleCount);
-    switch (sampleType) {
-        case 0: // Normal
-            for (let i = 0; i < activeArr.length; i++) {
-                let j = i;
-                
-                if (projType == 1) { j = bassProjFn(i, activeArr.length); }
-                if (projType == 2) { j = id2FreqFn(i, activeArr.length); }
-                
-                let xp = parseFloat(i) / parseFloat(activeArr.length);
-                let yp = activeArr[j];
-                
-                arr.push(yp);
-                arrx.push(xp);
-            }
-            break;
-        case 1: // Average
-            for (let i = 0; i < activeArr.length - interval; i += interval) {
-                let a = i;
-                let b = i + interval;
-                let val = 0.0;
-                
-                // Average
-                for (let j = a; j < b; j++) {
-                    let id = j;
-                    if (projType == 1) { id = bassProjFn(j, activeArr.length); }
-                    if (projType == 2) { id = id2FreqFn(j, activeArr.length); }
-                    val += activeArr[id];
-                } val /= b - a;
-                
-                let xp = parseFloat(i) / parseFloat(activeArr.length);
-                let yp = val;
-                
-                arr.push(yp);
-                arrx.push(xp);
-            }
-            break;
-        case 2: // Maximum
-            for (let i = 0; i < activeArr.length - interval; i += interval) {
-                let a = i;
-                let b = i + interval;
-                let val = 0.0;
-                
-                let xoff = 0.0;
-                
-                // Average
-                for (let j = a; j < b; j++) {
-                    let id = j;
-                    if (projType == 1) { id = bassProjFn(j, activeArr.length); }
-                    if (projType == 2) { id = id2FreqFn(j, activeArr.length); }
-                    val = Math.max(val, activeArr[id]);
-                    
-                    let hor_dir = Math.sign(j - (a + b / 2.0));
-                    if (j - (a + b / 2.0) < 1.0) { hor_dir = 0.0; }
-                    
-                    xoff += val * hor_dir * horizonatl_power;
-                }
-                
-                let xp = parseFloat(i) / parseFloat(activeArr.length) + xoff;
-                let yp = val;
-                
-                arr.push(yp);
-                arrx.push(xp);
-            }
-            break;
-        case 3: // Minimum
-            for (let i = 0; i < activeArr.length - interval; i += interval) {
-                let a = i;
-                let b = i + interval;
-                let val = 0.0;
-                
-                let xoff = 0.0;
-                
-                // Average
-                for (let j = a; j < b; j++) {
-                    let id = j;
-                    if (projType == 1) { id = bassProjFn(j, activeArr.length); }
-                    if (projType == 2) { id = id2FreqFn(j, activeArr.length); }
-                    val = Math.min(val, activeArr[id]);
-                    
-                    let hor_dir = Math.sign(j - (a + b / 2.0));
-                    if (j - (a + b / 2.0) < 1.0) { hor_dir = 0.0; }
-                    
-                    xoff += val * hor_dir * horizonatl_power;
-                }
-                
-                let xp = parseFloat(i) / parseFloat(activeArr.length) + xoff;
-                let yp = val;
-                
-                arr.push(yp);
-                arrx.push(xp);
-            }
-            break;
+    
+    // Sample
+    for (let i = 0; i < activeArr.length - interval; i += interval) {
+        let a = i;
+        let b = i + interval;
+        let val = 0.0;
+        
+        // Average
+        for (let j = a; j < b; j++) {
+            let id = j;
+            if (projType == 1) { id = bassProjFn(j, activeArr.length); }
+            val = Math.max(val, activeArr[id]);
+        }
+        
+        let xp = parseFloat(i) / parseFloat(activeArr.length);
+        let yp = val;
+        
+        arr.push(yp);
+        arrx.push(xp);
     }
+    
     arr.push(0.0);
     arrx.push(1.0);
     
@@ -355,11 +263,6 @@ function livelyAudioListener(audioArray) {
         let posFrom = (layout == 0) ?  lerp(start, end, progFrom)  : (lerp(0, canvas.width, progFrom));
         let posTo   = (layout == 0) ?  lerp(start, end, progTo)    : (lerp(0, canvas.width, progTo));
         
-        if (horizonatl_position) {
-            posFrom = lerp(start, start, arrx[i]);
-            posTo   = lerp(start, start, arrx[i+1]);
-        }
-        
         //let valFrom = Math.floor(progTo      * (arr.length-1));
         //let valTo =   Math.floor(prog3       * (arr.length-1));
         
@@ -379,12 +282,6 @@ function livelyAudioListener(audioArray) {
         // TODO : try calculating bezier handles with next and previous audio array points
         let y0 = y1; // arr[val0]    * amplitude * max_height;
         let y3 = y2; // arr[val3]    * amplitude * max_height;
-        
-        if (horizonatl_arm) {
-            if (i > 0)         { y0 = y1 - arrx[i] * 20.0; }
-            if (i < SAMPLES-1) { y3 = y2 + arrx[i] * 20.0; }
-        }
-        
         // let div = valTo - valFrom;
         
         // Get average volume at sample range
@@ -436,6 +333,37 @@ function livelyAudioListener(audioArray) {
     }
     
     
+    /*
+    >> Alternative Interpolation Method using Easing
+    
+    if (false) {
+        let NEIGHBORS = 10; // Neighbors to scan left & right
+        let RES = 10; // Steps between two sample points
+        
+        for (let i = 0; i < arr.length * RES; i++) {
+            let pos = parseFloat(i) / parseFloat(RES);
+            let fpos = Math.floor(pos); // flat
+            let v = 0;
+            for (let j = -NEIGHBORS; j < NEIGHBORS; j++) {
+                let p = Math.min(Math.max(pos + j, 0), arr.length); // Clamp
+                
+                let prev = arr[Math.floor(p)];
+                let next = arr[Math.ceil(p)];
+                let fract = p - Math.trunc(p);
+                let rv = lerp(prev, next, easeInOutQuint(fract)); // TODO : Use easeing / smooth lerp function
+                v += rv;
+            }
+            
+            let px = lerp(start, end, parseFloat(fpos) / parseFloat(arr.length));
+            
+            if (i == 0) { v = 0; }
+            let py = v * amplitude * max_height * 0.1;
+            pts.push([px, py]);
+        }
+    }
+    */
+    
+    
     
     
     BGgradient = ctx.createLinearGradient(0, 0, window.innerWidth, window.innerHeight);
@@ -471,35 +399,6 @@ function livelyAudioListener(audioArray) {
     }
     
     
-    /*
-    >> Alternative Interpolation Method using Easing
-    
-    if (false) {
-        let NEIGHBORS = 10; // Neighbors to scan left & right
-        let RES = 10; // Steps between two sample points
-        
-        for (let i = 0; i < arr.length * RES; i++) {
-            let pos = parseFloat(i) / parseFloat(RES);
-            let fpos = Math.floor(pos); // flat
-            let v = 0;
-            for (let j = -NEIGHBORS; j < NEIGHBORS; j++) {
-                let p = Math.min(Math.max(pos + j, 0), arr.length); // Clamp
-                
-                let prev = arr[Math.floor(p)];
-                let next = arr[Math.ceil(p)];
-                let fract = p - Math.trunc(p);
-                let rv = lerp(prev, next, easeInOutQuint(fract)); // TODO : Use easeing / smooth lerp function
-                v += rv;
-            }
-            
-            let px = lerp(start, end, parseFloat(fpos) / parseFloat(arr.length));
-            
-            if (i == 0) { v = 0; }
-            let py = v * amplitude * max_height * 0.1;
-            pts.push([px, py]);
-        }
-    }
-    */
     
     // Draw Lines
     // Bottom
@@ -534,34 +433,6 @@ function livelyAudioListener(audioArray) {
             ctx.fillStyle = gradientMain ? gradient : linesColor;
             ctx.fill();
         }
-        
-        /*
-        // Top
-        ctx.beginPath();
-        ctx.lineJoin = "round";
-        ctx.moveTo(startPos + pos_offset[0], midY + pos_offset[1]);
-        
-        for (let i = 0; i < pts.length; i++) {
-            let p = pts[i];
-            ctx.lineTo(p[0] + pos_offset[0], midY - p[1] + pos_offset[1]);
-        }
-        ctx.lineTo(end + pos_offset[0], midY + pos_offset[1]);
-        
-        if (outlineOnly) {
-            ctx.shadowBlur = 10.0;
-            ctx.shadowColor = gradientMain ? gradient : linesColor;
-            
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = gradientMain ? gradient : linesColor;
-            ctx.stroke();
-        }
-        else {
-            ctx.shadowBlur = 0.0;
-            
-            ctx.fillStyle = gradientMain ? gradient : linesColor;
-            ctx.fill();
-        }
-        */
         
         // Song Data
         ctx.textAlign = "center";
@@ -663,8 +534,8 @@ function setColorDataShit(data) {
         
     } else {
         cover.src = null
-        title = "ERROR - FUuUCK"
-        artist = "joe mama"
+        title = "ERROR"
+        artist = "..."
     }
     
     
@@ -675,12 +546,6 @@ function setColorDataShit(data) {
 // ID COnversions
 function bassProjFn(i, l) {
     return Math.floor( ( Math.pow(parseFloat(i) / parseFloat(l), 2.0) ) * l );
-}
-
-const max_freq = 5000;
-function id2FreqFn(i, l) {
-    let freq = parseFloat(i) / parseFloat(l) * max_freq;
-    return Math.floor(parseFloat(12 * Math.log2(freq / 20.0)) / 95.0 * l);
 }
 
 // EASINGS
@@ -777,83 +642,6 @@ function doColorStuff(color) {
     return [`rgb(${mainColor.toString()}`, `rgb(${bgColor.toString()}`, darkColor, `rgb(${simmilarColor.toString()}`, `rgb(${simmilarColorBG.toString()}`];
 }
 
-function colorStuffSuggestive(color) {
-    
-    // [0] > gradient > [3]  ,  [1] show background at bottom true / false  ,  [2] darker Main / BG  ,  [1] > gradient > [4]
-    // return [`rgb(${mainColor.toString()}`, `rgb(${bgColor.toString()}`, darkColor, `rgb(${simmilarColor.toString()}`, `rgb(${simmilarColorBG.toString()}`];
-    
-    let mainA = [0, 0, 0]
-    let mainInterest = 0.0;
-    let mainB = [0, 0, 0]
-    let mainBDiff = 1.0
-    let bgA = [0, 0, 0]
-    let bgDifference = 0.0;
-    let bgB = [0, 0, 0]
-    let bgBDiff = 1.0
-    
-    let isBorderMain = false
-    
-    
-    // Find most interesting color
-    for (let i = 0; i < color.length; i++) {
-        let c = color[i];
-        let chsv = rgbToHsv(c);
-        let interest = ( chsv[1] * 5.0 + chsv[2] * 2.0 ) / 7.0 / 256.0;
-        if (interest > mainInterest) {
-            mainInterest = interest;
-            mainA = c;
-        }
-    }
-    
-    // Find color with most difference to main color
-    for (let i = 0; i < color.length; i++) {
-        let c = color[i];
-        let chsv = rgbToHsv(c);
-        let mainhsv = rgbToHsv(mainA);
-        
-        if (c == mainA) { continue; }
-        
-        // TODO : Add check to figure out if a light- or dark background would fit better
-        let idealHDiff = ( mainhsv[0] + 128.0 ) % 256.0;
-        let idealDiff = (idealHDiff + ( Math.abs(mainhsv[1] - chsv[1]) ) + ( Math.abs(mainhsv[2] - chsv[2]) ) ) / 3.0;
-        if (idealDiff > bgDifference) {
-            bgDifference = idealDiff;
-            bgA = c;
-        }
-    }
-    
-    // Find colors most simmilar to main and bg
-    for (let i = 0; i < color.length; i++) {
-        let c = color[i];
-        let chsv = rgbToHsv(c);
-        
-        if (c != mainA) {
-            let diff = ( Math.abs(c[0] - mainA[0]) + Math.abs(c[1] - mainA[1]) + Math.abs(c[2] - mainA[2]) ) / 3.0 / 256.0;
-            if (diff < mainBDiff) {
-                mainBDiff = diff;
-                mainB = c;
-            }
-        }
-        
-        if (c != bgA) {
-            let diff = ( Math.abs(c[0] - bgA[0]) + Math.abs(c[1] - bgA[1]) + Math.abs(c[2] - bgA[2]) ) / 3.0 / 256.0;
-            if (diff < bgBDiff) {
-                bgBDiff = diff;
-                bgB = c;
-            }
-        }
-    }
-    
-    isBorderMain = bgValue(mainA) > bgValue(bgA);
-    
-    // 1. Determine how "interesting" the cover is by checking how many of the generated colors have a different hue / saturation / value to eachother
-    // 2. Use that data to determine what kind of color theorie type ( color wheel ) should be used
-    // 3. Determine the main color based on the most interesting color in the shot
-    // 4. Generate a secondary color based on the color theorie
-    // 5. Generate 2 gradient colors based on more color theorie
-    
-    return [`rgb(${mainA.toString()}`, `rgb(${bgA.toString()}`, isBorderMain, `rgb(${mainB.toString()}`, `rgb(${bgB.toString()}`];
-}
 
 /* Returns 2 color gradients based on 1 selected main color */
 function colorMagic(color) {
@@ -961,60 +749,6 @@ function generatedColors() {
 }
 
 
-function colorDominant(shades, main_col) {
-    /*
-    let main_col = colorThief.getColor(cover)
-    let shades   = colorThief.getPalette(cover, 8);
-    */
-    
-    let bgA = [0, 0, 0];
-    let bgA_contrast = 0.0;
-    let bgA_shift = 0.0;    // Closest distance to complimentary hue of main color
-    
-    for (let i = 0; i < shades.length; i++) {
-        let c = shades[i];
-        let chsv = rgbToHsv(shades[i]);
-        let ctr = contrast(main_col, c);
-        let shift = Math.abs( (( rgbToHsv(c)[0] + 180 ) % 360 ) - ( chsv[0] ) ) ;
-        
-        if (ctr > bgA_contrast || shift > bgA_shift) {
-            bgA = c;
-            bgA_contrast = ctr;
-            bgA_shift = shift;
-        }
-    }
-    
-    
-    
-    
-    let simmilarColor = main_col; // assume
-    let mincs = 1.0;
-    for (let i = 1; i < shades.length; i++) {
-        let tmp = rgbDifference(main_col, shades[i]);
-        if (tmp < mincs && tmp > 0.03) {
-            mincs = tmp;
-            simmilarColor = shades[i];
-        }
-    }
-    
-    let simmilarColorBG = bgA; // assume
-    let mincsbg = 1.0;
-    for (let i = 0; i < shades.length; i++) {
-        let tmp = rgbDifference(bgA, shades[i]);
-        if (tmp < mincsbg && tmp > 0.03) {
-            mincsbg = tmp;
-            simmilarColorBG = shades[i];
-        }
-    }
-    
-    
-    let darkColor = bgValue(main_col) > bgValue(bgA);
-    
-    
-    
-    return [`rgb(${main_col.toString()}`, `rgb(${bgA.toString()}`, darkColor, `rgb(${simmilarColor.toString()}`, `rgb(${simmilarColorBG.toString()}`];
-}
-
 
 function rgbToHsv(rgb) {
     let r = rgb[0] / 255,
@@ -1077,10 +811,6 @@ function bgValue(col) {
     return (col[0] + col[1] + col[2]) / 3.0 / 255.0;
 }
 
-function lerp(a, b, weight) {
-    return a * (1.0 - weight) + b * weight;
-}
-
 function rgbDifference(rgb1, rgb2) {
     let hsv1 = rgbToHsv(rgb1);
     let hsv2 = rgbToHsv(rgb2);
@@ -1113,19 +843,12 @@ function hexToRgb(hex) {
 
 
 
-
-
-
-var gradients = [];
-var permutation = [];
-
-
 function fade(t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-function lerp(a, b, t) {
-    return (1 - t) * a + t * b;
+function lerp(a, b, weight) {
+    return a * (1.0 - weight) + b * weight;
 }
 
 function noise(x) {
