@@ -1,0 +1,17 @@
+{
+  "AppVersion": "1.1.0.0",
+  "Title": "Clean Audio",
+  "Thumbnail": "ypfdr3lc.jpg",
+  "Preview": "bqqlz4yh.gif",
+  "Desc": "Smooth Audio Spectrum Visualizer reacting to media audio and cover",
+  "Author": "Liam S.",
+  "License": "MIT",
+  "Contact": null,
+  "Type": 1,
+  "FileName": "index.html",
+  "Arguments": "--system-nowplaying --audio",
+  "IsAbsolutePath": false,
+  "Id": null,
+  "Tags": null,
+  "Version": 0
+}

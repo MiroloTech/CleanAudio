@@ -1,0 +1,135 @@
+{
+  "amplitude": {
+    "max": 10.0,
+    "min": 0.1,
+    "tick": 1,
+    "step": 0.1,
+    "text": "Audio Amplification",
+    "type": "slider",
+    "value": 2.5
+  },
+  "samples": {
+    "max": 50,
+    "min": 5,
+    "tick": 1,
+    "step": 1,
+    "text": "Sample Points",
+    "type": "slider",
+    "value": 15
+  },
+  "highres": {
+    "type": "checkbox",
+    "value": true,
+    "text": "High Res."
+  },
+  "sampleType": {
+    "type": "dropdown",
+    "value": 2,
+    "text": "Sample Type",
+    "items": [
+      "Points",
+      "Average",
+      "Maximum"
+    ]
+  },
+  "horizontal": {
+    "type": "dropdown",
+    "value": 0,
+    "text": "Horizontal mode",
+    "items": [
+      "None",
+      "Arm",
+      "Position",
+      "Position + Arm"
+    ]
+  },
+  "smoothing": {
+    "max": 50.0,
+    "min": 1.0,
+    "tick": 1,
+    "step": 1.0,
+    "text": "Visual Smoothing",
+    "type": "slider",
+    "value": 10.0
+  },
+  "colorMode": {
+    "type": "dropdown",
+    "value": 1,
+    "text": "Color Mode",
+    "items": [
+      "Cover",
+      "Suggestive",
+      "Magic",
+      "Generated",
+      "Dominant",
+      "Custom"
+    ]
+  },
+  "mainColor1": {
+    "text": "Main Color",
+    "type": "color",
+    "value": "#E29578"
+  },
+  "mainColor2": {
+    "type": "color",
+    "value": "#FFDDD2"
+  },
+  "bgColor1": {
+    "text": "Backgroud Color",
+    "type": "color",
+    "value": "#006D77"
+  },
+  "bgColor2": {
+    "type": "color",
+    "value": "#83C5BE"
+  },
+  
+  "ProjType" : {
+    "type": "dropdown",
+    "value": 1,
+    "text": "Projection Type",
+    "items": [
+      "Normal",
+      "Squared",
+      "freq > id"
+    ]
+  },
+  "gradient" : {
+    "type": "checkbox",
+    "value": true,
+    "text": "Main Gradient"
+  },
+  "gradientBG" : {
+    "type": "checkbox",
+    "value": true,
+    "text": "Background Gradient"
+  },
+  "outlineOnly": {
+    "type": "checkbox",
+    "value": false,
+    "text": "Outline"
+  },
+  "screenshake": {
+    "max": 2.5,
+    "min": 0.0,
+    "tick": 0.1,
+    "step": 0.1,
+    "text": "Screenshake",
+    "type": "slider",
+    "value": 0.0
+  },
+  "shadow": {
+    "type": "checkbox",
+    "value": false,
+    "text": "Shadow"
+  },
+  "layout": {
+    "type": "dropdown",
+    "value": 0,
+    "text": "Layout",
+    "items": [
+      "Centre",
+      "Top-Down"
+    ]
+  }
+}
