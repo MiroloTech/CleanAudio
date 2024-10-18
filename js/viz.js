@@ -178,10 +178,11 @@ function livelyAudioListener(audioArray) {
                     finCols = setColorsToPicked()
                     break;
                 default: // random
-                    finCols = generatedColors();
+                    finCols = setColorsToPicked();
                     break;
             }
-        } catch (_err) {
+        } catch (err) {
+            console.log(err.message);
             finCols = setColorsToPicked()
         }
     }
@@ -726,26 +727,24 @@ function colorMagic(color) {
     return [`rgb(${mainA.toString()}`, `rgb(${bgA.toString()}`, isBorderMain, `rgb(${mainB.toString()}`, `rgb(${bgB.toString()}`];
 }
 
-let mainColorGen = [0, 0, 0];
-let bgColorGen = [0, 0, 0];
-let similarMainColorGen = [0, 0, 0];
-let similarBgColorGen = [0, 0, 0];
-let lastTitle = "";
 function generatedColors() {
-    // [0] > gradient > [3]  ,  [2] show background at bottom true / false  ,  [1] > gradient > [4]
-    // return [`rgb(${mainColor.toString()}`, `rgb(${bgColor.toString()}`, darkColor, `rgb(${simmilarColor.toString()}`, `rgb(${simmilarColorBG.toString()}`];
-    if (lastTitle != title) {
-        mainColorGen = hsvToRgb([Math.floor(Math.random() * 256), 128 + Math.floor(Math.random() * 128), 128 + Math.floor(Math.random() * 128)]);
-        bgColorGen = hsvToRgb([mainColorGen[0] + Math.floor((Math.random()*2-1) * 10), 5 + Math.floor(Math.random() * 85), 5 + Math.floor(Math.random() * 85)]);
-        
-        similarMainColorGen = hsvToRgb([(mainColorGen[0] + Math.floor((Math.random()*2-1) * 15)) % 256, mainColorGen[1], mainColorGen[2]]);
-        similarBgColorGen =   hsvToRgb([(bgColorGen[0]   + Math.floor((Math.random()*2-1) * 15)) % 256,   bgColorGen[1],   bgColorGen[2]]);
-    }
+    let hash = hashString(title);
+    console.log(hash);
     
-    lastTitle = title;
+    // Base hue is taken from the hash, then we calculate a complementary hue
+    let baseHue = hash % 360;
+    let complementaryHue = (baseHue + 180) % 360; // 180 degrees opposite
     
+    // Generate the gradients
+    let gradient1Start = hsvToRgb([baseHue, 150, 200]);   // More contrast
+    let gradient1End = hsvToRgb([baseHue, 75, 150]);
     
-    return [`rgb(${mainColorGen.toString()}`, `rgb(${bgColorGen.toString()}`, true, `rgb(${similarMainColorGen.toString()}`, `rgb(${similarBgColorGen.toString()}`];
+    let gradient2Start = hsvToRgb([complementaryHue, 100, 180]); // Less contrast
+    let gradient2End = hsvToRgb([complementaryHue, 51, 130]);
+    
+    let darkColor = bgValue(gradient1Start) > bgValue(gradient2Start);
+    
+    return [`rgb(${gradient1Start.toString()}`, `rgb(${gradient2Start.toString()}`, darkColor, `rgb(${gradient1End.toString()}`, `rgb(${gradient2End.toString()}`];
 }
 
 
@@ -778,33 +777,18 @@ function rgbToHsv(rgb) {
 
 function hsvToRgb(hsv) {
     let [h, s, v] = hsv;
-    h = h * 360 / 255; // Convert h from 0-255 to 0-360 degrees
-    s /= 255; // Convert s from 0-255 to 0-1
-    v /= 255; // Convert v from 0-255 to 0-1
-
-    let r, g, b;
-
-    let i = Math.floor(h / 60);
-    let f = h / 60 - i;
-    let p = v * (1 - s);
-    let q = v * (1 - f * s);
-    let t = v * (1 - (1 - f) * s);
-
-    switch (i % 6) {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-    }
-
-    // Convert r, g, b from 0-1 to 0-255
-    r = Math.round(r * 255);
-    g = Math.round(g * 255);
-    b = Math.round(b * 255);
-
-    return [r, g, b];
+    h = parseFloat(h);
+    s = parseFloat(s / 255.0);
+    v = parseFloat(v / 255.0);
+    
+    let f= (n,k=(n+h/60)%6) => v - v*s*Math.max( Math.min(k,4-k,1), 0);
+    // return [f(5),f(3),f(1)];
+    
+    return [
+        Math.round(f(5) * 255.0),
+        Math.round(f(3) * 255.0),
+        Math.round(f(1) * 255.0)
+    ];
 }
 
 function bgValue(col) {
@@ -842,6 +826,15 @@ function hexToRgb(hex) {
 }
 
 
+
+
+function hashString(str) {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash * 33) ^ str.charCodeAt(i);
+    }
+    return hash >>> 0; // Convert to positive integer
+}
 
 function fade(t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
